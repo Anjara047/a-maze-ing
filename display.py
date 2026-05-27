@@ -11,19 +11,29 @@ img = mlx.mlx_new_image(ptr, 200, 200)
 
 data, bpp, sl, fmt = mlx.mlx_get_data_addr(img)
 
-def draw_horizontal(x: float, y: float) -> None:
-	x, y = 20, 0
-	for x in range(40):
-		offset = y * sl + x * (bpp // 8)
+def draw_horizontal(x: float, y: float, length: float) -> None:
+	for i in range(length):
+		offset = y * sl + (x + i) * (bpp // 8)
 		data[offset:offset+4] = (0xFFFFFFFF).to_bytes(4, 'little')
-def draw_vertical(x: float, y: float) -> None:
-	x, y = 0, 20
-	for y in range(40):
-		offset = y * sl + x * (bpp // 8)
+def draw_vertical(x: float, y: float, length: float) -> None:
+	for i in range(length):
+		offset = (y + i) * sl + x * (bpp // 8)
 		data[offset:offset+4] = (0xFFFFFFFF).to_bytes(4, 'little')
 
-def draw_square(wall: str, loc: tuple[int, int]) -> None:
+def draw_square(wall: str, loc: tuple[float, float], length:  float) -> None:
+	x = loc[0]
+	y = loc[1]
 	
+	draw_horizontal(x, y, length)
+	draw_vertical(x, y, length)
+	draw_horizontal(x + length, y, length)
+	draw_vertical(x, y + length, length)
+
+draw_square("wall", (400, 300), 40)
+draw_vertical(10, 20, 40)
+draw_horizontal(10, 20, 40)
+draw_vertical(20, 20, 40)
+draw_horizontal(10, 40, 40)
 
 mlx.mlx_put_image_to_window(ptr, win, img, 0, 0)
 
