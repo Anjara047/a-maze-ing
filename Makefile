@@ -8,14 +8,14 @@ install:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) $(MAIN)
+	@$(PYTHON) $(MAIN)
 
 debug:
-	$(PYTHON) -m pdb $(MAIN)
+	@$(PYTHON) -m pdb $(MAIN)
 
 clean:
-	rm -rf __pycache__
-	rm -rf .mypy_cache
+	@rm -rf __pycache__
+	@rm -rf .mypy_cache
 
 lint:
 	flake8 .
