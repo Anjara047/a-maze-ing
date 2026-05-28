@@ -6,9 +6,12 @@ mlx = Mlx()
 
 ptr = mlx.mlx_init()
 
-win = mlx.mlx_new_window(ptr, 800, 600, "Maze")
+width = configs["WIDTH"] * 41
+height = configs["HEIGHT"] * 45
 
-img = mlx.mlx_new_image(ptr, 800, 600)
+win = mlx.mlx_new_window(ptr, width, height, "Maze")
+
+img = mlx.mlx_new_image(ptr, width, height)
 
 data, bpp, sl, fmt = mlx.mlx_get_data_addr(img)
 
@@ -26,23 +29,36 @@ def draw_vertical(x: float, y: float, length: float, color: int, thickness : int
 	if thickness > 0:
 		draw_vertical(x + 1, y, length, color, thickness - 1)
 
-def draw_square(wall: int, loc: tuple[float, float], length:  float, color: int) -> None:
-	x, y = loc
-	thickness = 4
-	draw_horizontal(x, y, length, color, thickness)
-	draw_vertical(x, y, length, color, thickness)
-	draw_vertical(x - (thickness + 1) + length, y, length, color, thickness)
-	draw_horizontal(x, y + length, length, color, thickness)
+#NESW
+def draw_square(cell: str, loc: tuple[float, float], length:  float, color: int) -> None:
 
-draw_maze()
+	if cell != "0":
+		walls = bin(int(cell, 16))[2:].zfill(4)
 
-mlx.mlx_put_image_to_window(ptr, win, img, 0, 0)
+		x, y = loc
+		thickness = 3
+		if walls[0] == "1":
+			draw_horizontal(x, y, length, color, thickness)
 
-mlx.mlx_destroy_image(ptr, img)
+		if walls[1] == "1":
+			draw_vertical(x, y, length, color, thickness)
 
-mlx.mlx_loop(ptr)
+		if walls[2] == "1":
+			draw_horizontal(x, y + length, length, color, thickness)
 
-mlx.mlx_put_image_to_window(ptr, win, img, 0, 0)
+		if walls[3] == "1":
+			draw_vertical(x - (thickness + 1) + length, y, length, color, thickness)
+
+func_params = {
+			"loc": (0, 0),
+			"length": 40,
+			"color": 0xFFFFFFFF
+				}
+file = open(configs['OUTPUT_FILE'], 'r')
+content = file.read()
+draw_maze(draw_square, func_params, content)
+
+mlx.mlx_put_image_to_window(ptr, win, img, 10, 10)
 
 mlx.mlx_destroy_image(ptr, img)
 
