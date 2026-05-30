@@ -1,3 +1,4 @@
+#! python3
 from mlx import Mlx
 from parser_config import configs
 from draw_maze import draw_maze
@@ -6,8 +7,8 @@ mlx = Mlx()
 
 ptr = mlx.mlx_init()
 
-width = configs["WIDTH"] * 41
-height = configs["HEIGHT"] * 45
+width = (configs["WIDTH"] * 40) + 40
+height = (configs["HEIGHT"] * 40) + 40
 
 win = mlx.mlx_new_window(ptr, width, height, "Maze")
 
@@ -19,35 +20,37 @@ def draw_horizontal(x: float, y: float, length: float, color: int, thickness : i
 	for i in range(length):
 		offset = y * sl + (x + i) * (bpp // 8)
 		data[offset:offset+4] = (color).to_bytes(4, 'little')
-	if thickness > 0:
-		draw_horizontal(x, y + 1, length, color, thickness - 1)
+#	if thickness > 0:
+#		draw_horizontal(x, y + 1, length, color, thickness - 1)
 
 def draw_vertical(x: float, y: float, length: float, color: int, thickness : int) -> None:
 	for i in range(length):
 		offset = (y + i) * sl + x * (bpp // 8)
 		data[offset:offset+4] = (color).to_bytes(4, 'little')
-	if thickness > 0:
-		draw_vertical(x + 1, y, length, color, thickness - 1)
+	#if thickness > 0:
+	#	draw_vertical(x + 1, y, length, color, thickness - 1)
 
 #NESW
 def draw_square(cell: str, loc: tuple[float, float], length:  float, color: int) -> None:
-
+	#juste pour tester(a enlever plus tard)
+	length = length - 3
 	if cell != "0":
 		walls = bin(int(cell, 16))[2:].zfill(4)
 
 		x, y = loc
-		thickness = 3
+		thickness = 4
+		#N
 		if walls[0] == "1":
 			draw_horizontal(x, y, length, color, thickness)
-
+		#E
 		if walls[1] == "1":
 			draw_vertical(x, y, length, color, thickness)
-
+		#S
 		if walls[2] == "1":
 			draw_horizontal(x, y + length, length, color, thickness)
-
+		#W
 		if walls[3] == "1":
-			draw_vertical(x - (thickness + 1) + length, y, length, color, thickness)
+			draw_vertical(x + length, y, length, color, thickness)
 
 func_params = {
 			"loc": (0, 0),
