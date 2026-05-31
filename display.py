@@ -34,6 +34,8 @@ def draw_vertical(x: float, y: float, length: float, color: int, thickness : int
 def draw_square(cell: str, loc: tuple[float, float], length:  float, color: int) -> None:
 	#juste pour tester(a enlever plus tard)
 	length = length - 3
+	if cell == "F":
+		color = 0xFF0000FF
 	if cell != "0":
 		walls = bin(int(cell, 16))[2:].zfill(4)
 
