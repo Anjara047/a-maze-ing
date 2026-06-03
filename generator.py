@@ -150,5 +150,5 @@ def generate_maps() -> str:
 		output += '\n'
 	return output
 
-register = open(configs['OUTPUT_FILE'], 'w')
-register.write(generate_maps())
+#register = open(configs['OUTPUT_FILE'], 'w')
+#register.write(generate_maps())

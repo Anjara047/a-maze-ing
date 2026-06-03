@@ -16,6 +16,14 @@ img = mlx.mlx_new_image(ptr, width, height)
 
 data, bpp, sl, fmt = mlx.mlx_get_data_addr(img)
 
+def on_close(data):
+	mlx.mlx_loop_exit(ptr)
+
+def on_key(keycode, data):
+	print(keycode)
+	if keycode == 120:
+		mlx.mlx_loop_exit(ptr)
+
 def draw_horizontal(x: float, y: float, length: float, color: int, thickness : int) -> None:
 	for i in range(length):
 		offset = y * sl + (x + i) * (bpp // 8)
@@ -66,5 +74,8 @@ draw_maze(draw_square, func_params, content)
 mlx.mlx_put_image_to_window(ptr, win, img, 10, 10)
 
 mlx.mlx_destroy_image(ptr, img)
+
+mlx.mlx_key_hook(win, on_key, None)
+mlx.mlx_hook(win, 33, 0, on_close, None)
 
 mlx.mlx_loop(ptr)
