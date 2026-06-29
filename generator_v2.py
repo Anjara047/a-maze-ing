@@ -2,6 +2,12 @@
 import random
 from parser_config import configs
 
+
+class NHError(Exception):
+	def __init__(self, msg: str = "Invalid Neighborhood") -> None:
+		super().__init__(msg)
+
+
 on = {
     'all': {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
     'north': {8, 9, 10, 11, 12, 13, 14},
@@ -29,38 +35,71 @@ def check_neighborhood(loc: int, output: str) -> tuple[int, int, int, int]:
     # crees qlq chose qui convertit loc en (x,y)
     y = loc // (coord_x + 1)
     x = loc - (y * (coord_x + 1))
-    north, east, south, west = (0, 0, 0, 0)
+    loc_north, loc_east, loc_south, loc_west = (-1,-1,-1,-1)
     # E
     if x > 0:
         loc_east = (y * (coord_x + 1)) + x - 1
-        east = int(output[loc_east], 16)
     # W
     if x < (coord_x - 1):
         loc_west = (y * (coord_x + 1)) + x + 1
-        west = int(output[loc_west], 16)
     # N
     if y > 0:
         loc_north = ((y - 1) * (coord_x + 1)) + x
-        north = int(output[loc_north], 16)
     # S
     if y < (coord_y - 1):
         loc_south = ((y + 1) * (coord_x + 1)) + x
-        south = int(output[loc_south], 16)
     print(f"cell is {output[loc]},x:{x},y:{y}")
-    return (north, east, south, west)
+    return (loc_north, loc_east, loc_south, loc_west)
 
 
-def destroy_wall(current_cell: int, next_cell: int):
-    pass
+def destroy_wall(output: str, current_loc: int, next_loc: int) -> str:
+	current_cell = output[current_loc]
+	next_cell = output[next_loc]
+	nh = check_neighborhood(current_loc, output)
+	next_pos = "north" if next_loc == nh[0]
+	next_pos = "east" if next_loc == nh[1]
+	next_pos = "south" if next_loc == nh[2]
+	next_pos = "west" if next_loc == nh[3]
+	
 
 
-def hunt_and_kill(output: str, perfect: bool):
+def choose_next(output: str, current: int, processed: list[int]) -> int:
+    neighborhood = check_neighborhood(current, output)
+    valid_cells = []
+    for cell in neighborhood:
+		valid = True
+        if cell < 0:
+			valid = False
+		if cell in processed:
+			valid = False
+		if valid:
+			valid_cells += [cell]
+	if not valid_cells:
+		raise NHError() 
+	return random.choice(valid_cells)
+
+
+def hunt_and_kill(output: str) -> str:
+    processed_cells = []
     entry: list[str] = configs['ENTRY'].split(",")
     current: int = int(entry[0]) + (int(entry[1]) * (coord_x + 1))
-# for 'F' in output:
-# pass
-    print(current)
+    while 'F' in output:
+        processed_cells += [current]
+		try:
+			next_cell = choose_next(output, current, processed_cells)
+
+		except NHError:
+			for x in range(len(output)):
+				if x not in processed_cells
+						and output[x] != '\n':
+					current = x
+					break
+
+
+def main():
+    output = full_cell()
+    hunt_and_kill(output)
 
 
 if __name__ == "__main__":
-    hunt_and_kill("", True)
+    main()
