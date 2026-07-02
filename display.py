@@ -46,7 +46,6 @@ def draw_vertical(x: float, y: float, length: float,
 
 # NESW
 
-
 def draw_square(
         cell: str, loc: tuple[float, float], length: float, color: int) -> None:
     # juste pour tester(a enlever plus tard)
@@ -79,6 +78,7 @@ func_params = {
 }
 file = open(configs['OUTPUT_FILE'], 'r')
 content = file.read()
+file.close()
 draw_maze(draw_square, func_params, content)
 
 mlx.mlx_put_image_to_window(ptr, win, img, 10, 10)
