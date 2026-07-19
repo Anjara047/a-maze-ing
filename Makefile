@@ -1,31 +1,45 @@
-PYTHON = python3.10
+PYTHON = python3
 PIP = pip
 MAIN = a_maze_ing.py
+FILENAME = config.txt
+RUN = poetry run
 
 .PHONY: install run debug clean lint lint-strict
 
 install:
-	$(PIP) install -r requirements.txt
+	@$(PIP) install poetry
+	@poetry install
 
 run:
-	@$(PYTHON) $(MAIN)
+	@$(RUN) $(PYTHON) $(MAIN) $(FILENAME)
 
 debug:
-	@$(PYTHON) -m pdb $(MAIN)
+	@$(RUN) $(PYTHON) -m pdb $(MAIN)
 
 clean:
 	@rm -rf __pycache__
+	@rm -rf mazegen/__pycache__
 	@rm -rf .mypy_cache
+	@find . -mindepth 1 \
+		\( -name mazegen -o -name .git \) -prune -o \
+		\( -name "a_maze_ing.py" -o \
+			-name "display.py" -o \
+			-name "draw_maze.py" -o \
+			-name "parser_config.py" -o \
+			-name "mazegen-0.1.0-py3-none-any.whl" -o \
+			-name "mlx-2.2-py3-none-any.whl" -o \
+			-name "README.md" -o \
+			-name "config.txt" -o \
+			-name "Makefile" -o \
+			-name "pyproject.toml" -o \
+			-name "themes.py" -o \
+			-name ".gitignore" \) -o \
+		-exec rm -rf {} +
 
 lint:
-	flake8 .
-	mypy . \
-		--warn-return-any \
-		--warn-unused-ignores \
-		--ignore-missing-imports \
-		--disallow-untyped-defs \
-		--check-untyped-defs`
-
-lint-strict:
-	flake8 .
-	mypy . --strict
+	-@$(RUN) flake8 .
+	-@$(RUN) mypy . --warn-return-any \
+					--warn-unused-ignores \
+					--ignore-missing-imports \
+					--disallow-untyped-defs \
+					--check-untyped-defs
