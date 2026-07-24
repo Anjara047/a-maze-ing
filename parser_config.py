@@ -1,174 +1,201 @@
+import sys
+from typing import Any
 from mazegen.generator import locate_pattern
-configs: dict[str, int | str | bool] = {
-    'WIDTH': 20,
-    'HEIGHT': 20,
-    'ENTRY': '0,0',
-    'EXIT': '',
-    'OUTPUT_FILE': 'maze.txt',
-    'PERFECT': True,
-    'REPRODUCTIBLE': True,
-    'SEED': 42
+
+configs: dict[str, Any] = {
+    'WIDTH': None,
+    'HEIGHT': None,
+    'ENTRY': None,
+    'EXIT': None,
+    'OUTPUT_FILE': None,
+    'PERFECT': None,
+    'SEED': -69
 }
-configs['EXIT'] = f"{int(configs['WIDTH']) - 1},{int(configs['HEIGHT']) - 1}"
 
 
-def censure_configs() -> None:
+def assign_param(key: str, value: str, mess: list[str]) -> bool:
     """
-    Validate and sanitize maze configuration values.
+    Validate and assign a configuration parameter.
 
-    This function checks maze dimensions, entry and exit coordinates,
-    and output file names. Invalid values are replaced with safe default
-    values to prevent generation errors or overwriting important files.
+    Checks whether the value associated with the given configuration key
+    is valid. If the value is valid, it is assigned with it's key.
+    Otherwise, an error message is appended to ``mess``.
 
-    The global configuration dictionary is modified directly.
+    Args:
+        key: The name of the configuration parameter.
+        value: The value associated with the parameter.
+        mess: A list used to collect validation error messages.
+
+    Returns:
+        True if the parameter was successfully validated and assigned,
+        False otherwise.
+
+    Raises:
+        ValueError: If the entry and exit coordinates are identical.
     """
-    coord_entry = str(configs['ENTRY']).split(",")
-    coord_exit = str(configs['EXIT']).split(",")
-    if (len(coord_entry) != 2
-            or not coord_entry[0].isdigit()
-            or not coord_entry[1].isdigit()):
-        print("[INVALID]The given ENTRY config is invalid:")
-        print("\t\t->it should follow the syntax 'int,int', ", end="")
-        print("example: ENTRY=2,1")
-        configs['ENTRY'] = "0,0"
-        coord_entry = str(configs['ENTRY']).split(",")
-    if (len(coord_exit) != 2
-            or not coord_exit[0].isdigit()
-            or not coord_exit[1].isdigit()):
-        print("[INVALID]The given EXIT config is invalid:")
-        print("\t\t->it should follow the syntax 'int,int', ", end="")
-        print("prexample: EXIT=10,10")
-        val_x = int(float(configs['WIDTH'])) - 1
-        configs['EXIT'] = (
-            f"{val_x},{int(float(configs['HEIGHT'])) - 1}"
-        )
-        coord_exit = str(configs['EXIT']).split(",")
-    try:
-        int(coord_entry[0])
-        int(coord_entry[1])
-        int(coord_exit[0])
-        int(coord_exit[1])
-    except Exception:
-        valu_x = int((float(coord_entry[0])))
-        configs['ENTRY'] = f"{valu_x},{int((float(coord_entry[1])))}"
-        configs['EXIT'] = (
-            f"{int((float(coord_exit[0])))},{int((float(coord_exit[1])))}"
-        )
-        coord_entry = str(configs['ENTRY']).split(",")
-        coord_exit = str(configs['EXIT']).split(",")
-    loc_entry = (int(coord_entry[0])) + (
-        (int(configs["WIDTH"]) + 1) * (int(coord_entry[1])))
-    loc_exit = (int(coord_exit[0])) + (
-        (int(configs["WIDTH"]) + 1) * (int(coord_exit[1])))
-    if int(configs["WIDTH"]) > 40:
-        configs['WIDTH'] = 40
-        print("[GOOD_TO_KNOW]The max width is fixed to 40 in", end="")
-        print(" order to avoid a bigger window than our screen:")
-        print("\t\t->so if a width bigger than 40 is given ", end="")
-        print("it will be set to 40")
-    if int(configs['HEIGHT']) > 22:
-        configs['HEIGHT'] = 22
-        print("[GOOD_TO_KNOW]The max height is fixed to 22 in", end="")
-        print(" order to avoid a bigger window than our screen:")
-        print("\t\t->so if a height bigger than 22 is given", end="")
-        print("it will be set to 22")
-    if int(configs['WIDTH']) < 7:
-        print("[GOOD_TO_KNOW]The min width is fixed to 7 in", end="")
-        print(" order to be sure that a beautiful maze will be generated")
-        print("\t\t->so yeah, you won't get a lower width than 7")
-        configs['WIDTH'] = 7
-    if int(configs['HEIGHT']) < 7:
-        print("[GOOD_TO_KNOW]The min height is fixed to 7 in", end="")
-        print(" order to be sure that a beautiful maze will be generated")
-        print("\t\t->so yeah, you won't get a lower height than 7")
-        configs['HEIGHT'] = 7
-    if ((loc_entry in locate_pattern(
-        int(configs['WIDTH']), int(configs['HEIGHT'])))
-        or (int(coord_entry[0]) >= int(configs['WIDTH']))
-            or (int(coord_entry[1]) >= int(configs['HEIGHT']))):
-        print("[INVALID]The ENTRY cell can't be ", end="")
-        print("located outside the maze,", end="")
-        print("nor where the 42 pattern is.")
-        configs['ENTRY'] = "0,0"
-    if ((loc_exit in locate_pattern(
-        int(configs['WIDTH']), int(configs['HEIGHT'])))
-        or (int(coord_exit[0]) >= int(configs['WIDTH']))
-            or (int(coord_exit[1]) >= int(configs['HEIGHT']))):
-        print("[INVALID]The EXIT cell can't be ", end="")
-        print("located outside the maze,", end="")
-        print("nor where the 42 pattern is.")
-        configs['EXIT'] = (
-            f"{int(configs['WIDTH']) - 1},"
-            f"{int(configs['HEIGHT']) - 1}"
-        )
-    if configs['EXIT'] == configs['ENTRY']:
-        print("[INVALID]", end="")
-        print("The ENTRY and the EXIT cell can't be located at the same place")
-        if configs['ENTRY'] != "0,0":
-            configs['EXIT'] = "0,0"
-        else:
-            configs['EXIT'] = (
-                f"{int(configs['WIDTH']) - 1},"
-                f"{int(configs['HEIGHT']) - 1}"
-            )
-    if ((configs['OUTPUT_FILE'] == "") or (configs['OUTPUT_FILE'] in [
-        "config.txt", "Makefile", "README.md", "themes.py",
-        "mazegen-0.1.0-py3-none-any.whl", "mazegen",
-        "a_maze_ing.py", "display.py",
-        "draw_maze.py", "/mazegen/generator.py",
-        "parser_config.py", "mlx-2.2-py3-none-any.whl",
-        "pyproject.toml"
-    ])):
-        print(f"[HEY!]The filename {configs['OUTPUT_FILE']}", end="")
-        print(" was already taken by one of the main file in the project:")
-        print("\t\t->so we gave the ouput file the default name 'maze.txt'")
-        configs['OUTPUT_FILE'] = "maze.txt"
-
-
-def update_configs(filename: str, redefine: bool = False) -> None:
-    """
-    Load and update maze configuration values from the file <filename>.
-
-    The function reads the configuration file, ignores comments and
-    invalid lines, converts values to their expected types, and updates
-    the global configuration dictionary. After loading, the values are
-    validated and corrected using censure_configs().
-    """
-    try:
-        with open(filename, "r") as f:
-            l_configs = [
-                line.strip()
-                for line in f if line != line.capitalize()
-                and not line.startswith("#")
-            ]
-    except Exception:
-        l_configs = []
-
-    int_configs = ["WIDTH", "HEIGHT", "SEED"]
-    bool_configs = ["PERFECT", "REPRODUCTIBLE"]
-    if not redefine:
+    state = False
+    if key == 'WIDTH':
         try:
-            for l_config in l_configs:
-                config = [
-                    element.strip() for element in str(l_config).split("=")
-                    ]
-                if config[0] in int_configs:
-                    try:
-                        if not config[1].isdigit():
-                            config[1] = "20"
-                        value = int(float(config[1]))
-                    except Exception:
-                        if config[1].split(",")[0].isalpha():
-                            value = int(float(config[1].split(",")[0]))
-                    if value > 0:
-                        configs[config[0]] = value
-                elif config[0] in bool_configs:
-                    if config[1] == 'False':
-                        configs[config[0]] = False
-                    else:
-                        configs[config[0]] = True
-                else:
-                    configs[config[0]] = config[1]
-        except Exception:
-            pass
-    censure_configs()
+            int(value)
+        except ValueError as error:
+            mess += [f"[WIDTH]: {error}"]
+        else:
+            if int(value) > 40:
+                value = "40"
+                print("[:)]max WIDTH is 40 by default because ", end="")
+                print("more than that would be too large for the screen")
+                print()
+            elif int(value) < 7:
+                value = "7"
+                print("[:)]min WIDTH is 7 by default because", end="")
+                print(" it'd be too small to get a beautiful maze")
+                print()
+            configs[key] = int(value)
+            state = True
+    elif key == 'HEIGHT':
+        try:
+            int(value)
+        except ValueError as error:
+            mess += [f"[HEIGHT]: {error}"]
+        else:
+            if int(value) > 23:
+                value = "23"
+                print("[:)]max HEIGHT is 23 by default because", end="")
+                print("more than that would be too large for the screen")
+                print()
+            elif int(value) < 7:
+                value = "7"
+                print("[:)]min HEIGHT is set 7 by default because", end="")
+                print(" it'd be too small to get a beautiful maze")
+                print()
+            configs[key] = int(value)
+            state = True
+    elif key == 'ENTRY':
+        values = value.split(",")
+        if value == configs['EXIT']:
+            raise ValueError(
+                "The coordinate of EXIT cannot be the same as ENTRY")
+        try:
+            if len(values) != 2:
+                raise ValueError("The coordinate must be similar to 'x,y'")
+            for coord in values:
+                int(coord)
+        except ValueError as error:
+            mess += [f"[ENTRY]: {error}"]
+        else:
+            configs[key] = value
+            state = True
+
+    elif key == 'EXIT':
+        values = value.split(",")
+        try:
+            if value == configs['ENTRY']:
+                raise ValueError(
+                    "The coordinate of EXIT cannot be the same as ENTRY")
+            if len(values) != 2:
+                raise ValueError("The coordinate must be similar to 'x,y'")
+            for coord in values:
+                int(coord)
+        except ValueError as error:
+            mess += [f"[EXIT]: {error}"]
+        else:
+            configs[key] = value
+            state = True
+
+    elif key == 'OUTPUT_FILE':
+        if value in [
+            "config.txt", "Makefile", "README.md", "themes.py",
+            "mazegen-0.1.0-py3-none-any.whl", "mazegen",
+            "a_maze_ing.py", "display.py",
+            "draw_maze.py", "mazegen/generator.py", "mazegen/__init__.py",
+            "parser_config.py", "mlx-2.2-py3-none-any.whl",
+            "pyproject.toml", ""
+        ]:
+            mess += ["[OUTPUT_FILE]: name has already been exist"]
+        else:
+            configs[key] = value
+
+    elif key == 'PERFECT':
+        if value == 'True':
+            configs[key] = True
+            state = True
+        elif value == 'False':
+            configs[key] = False
+            state = True
+        else:
+            mess += ["[PERFECT]: It must be either True or False"]
+
+    elif key == 'SEED':
+        try:
+            int(value)
+        except ValueError as error:
+            mess += [f"[SEED]: {error}"]
+        else:
+            configs[key] = int(value)
+            state = True
+    return state
+
+
+def update_configs(filename: str, first_call: bool = False) -> None:
+    """
+    Read the configs file and update the configuration file,
+    it opens the configuration file and extract each parameter that does
+    not start with "#"
+    It also checks the postion of the entry and exit if they are valid,
+    and raise a message in case they are not.
+
+    Args:
+        filename: name of the config file
+        first_call: checking on whether it's the first call of the function
+    """
+    mess: list[str] = []
+    try:
+        with open(filename) as config_file:
+            config_lines = [
+                line.strip()
+                for line in config_file.readlines()
+                if (not line.startswith("#")
+                    and line != line.capitalize())
+            ]
+    except OSError as error:
+        print(f"Invalid config file: {error}")
+        sys.exit(1)
+    for config_line in config_lines:
+        param = config_line.split("=")
+        if len(param) == 2:
+            if param[0] in configs.keys():
+                assign_param(param[0], param[1], mess)
+    try:
+        coo_ent = configs['ENTRY'].split(",")
+        if (not (int(coo_ent[0]) >= 0 and int(coo_ent[0]) < configs['WIDTH'])):
+            mess += ["[ENTRY]The coordinate x is outside the area of the maze"]
+        if not (int(coo_ent[1]) >= 0 and int(coo_ent[1]) < configs['HEIGHT']):
+            mess += ["[ENTRY]The coordinate y is outside the area of the maze"]
+        co_ex = configs['EXIT'].split(",")
+        if (not (int(co_ex[0]) >= 0 and int(co_ex[0]) < configs['WIDTH'])):
+            mess += ["[EXIT]The coordinate x is outside the area of the maze"]
+        if (not (int(co_ex[1]) >= 0 and int(co_ex[1]) < configs['HEIGHT'])):
+            mess += ["[EXIT]The coordinate y is outside the area of the maze"]
+        loc_ent = int(coo_ent[0]) + (int(coo_ent[1]) * (configs['WIDTH'] + 1))
+        loc_exit = int(co_ex[0]) + (int(co_ex[1]) * (configs['WIDTH'] + 1))
+        if loc_ent in locate_pattern(configs['WIDTH'], configs['HEIGHT']):
+            mess += ["[ENTRY] The coordinate cannot be at the 42 pattern"]
+        if loc_exit in locate_pattern(configs['WIDTH'], configs['HEIGHT']):
+            mess += ["[EXIT] The coordinate cannot be at the 42 pattern"]
+        if first_call:
+            if configs['WIDTH'] < 10 or configs['HEIGHT'] < 10:
+                print("[HEY!]The Area is too small for the pattern")
+                print("\t\t->so the pattern is omitted.\n")
+    except Exception:
+        pass
+    if len(mess) > 0:
+        for message in mess:
+            print("#", message, "\n")
+        sys.exit()
+    if None in configs.values():
+        print("\n"*2)
+        print("\t\t\t***********HEEEEEYYYYYY*********")
+        print("\t\t      WHAT ARE YOU DOING,THAT'S IMPOSSIBLE")
+        print("\t\t   Missing mandatory element in the config file")
+        print("\n"*2)
+        sys.exit()

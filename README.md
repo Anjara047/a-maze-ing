@@ -37,18 +37,61 @@ make lint   :        # Run flake8 and mypy
 ## Resources
 
 * Thanks to the 42 School learning system, particularly the peer-to-peer methodology, which greatly helped in understanding the project's objectives and expectations.
-* Online documentation and tutorials, which provided ideas and inspiration for Algorithms, strategies, and implementation technics
+* Online documentation and tutorials(Google, youtube, etc.), which provided ideas and inspiration for Algorithms, strategies, and implementation technics
 
 ### Use of AI
 
 * AI tools were used as learning aids to better understand expected behaviors, clarify edge cases, and verify reasoning while debugging.
 * AI was not used to directly generate the project solution, but to assist with explanations, documentation writing, and overall project organization.
 
+## About The project
+
+From here we're gonna talk much more about the project
+
+### Structure and Format of the Configuration File
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  This project really depend on this file, this file contains all the mandatory parametrs
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The maze generator reads its settings from a configuration file. Each parameter controls a specific aspect of the maze generation, such as its dimensions, the positions of the entry and exit, the output file, and the generation options. The available parameters are described below.
+
+```text
+# Maze width
+WIDTH
+Defines the width of the maze (and the MLX window), in cells.
+
+# Maze height
+HEIGHT
+Defines the height of the maze (and the MLX window), in cells.
+
+# Entry coordinates (x,y)
+ENTRY
+Specifies the coordinates of the maze entry in the format x,y.
+
+# Exit coordinates (x,y)
+EXIT
+Specifies the coordinates of the maze exit in the format x,y.
+
+# Output filename
+OUTPUT_FILE
+Specifies the name of the file where the generated maze will be saved.
+
+# Is the maze perfect?
+PERFECT
+Set to True to generate a perfect maze, or False to allow multiple possible paths.
+
+# Seed
+SEED
+An optional value used to initialize the random number generator. Using the same seed always generates the same maze. Leave it commented out or omit it to generate a different maze each time.
+```
+
+There is default config file at the root of the directory if an example is needed
+
 ## Algorithm
 
 ### Generate Maze
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Generating maze was built through the idea of the algorithm hunt and kill, but this is for the perfect maze
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Generating maze was built through the idea of the algorithm hunt and kill, but this is for the perfect maze, in this file also to generate the name of the output file which contains the hexadecimal the maze, this file also contains on whether the perfect or not maze is and the one is seed.
+
 
 We tried to create our own algorithm but due to its difficulty in builting the maze as which is the real labirynth, we had to take the inspiration from the existed algorithm
 
@@ -113,6 +156,11 @@ An **imperfect maze** can contain loops and multiple possible paths. In our modi
 
 **Usage**:
 
+> `get_maze:`  Get the generated maze <br>
+> `get_solution:` Get the maze's solution(the path) <br>
+> `solve:` Compute the shortest solution <br>
+> `generate:` Generate the maze by calling the strategies which has been created above and Initializing all walls before using the hunt & kill algorithm
+
 To install the mazegen package, run this command below:  
         `pip install <path-to>/mazegen-0.1.0-py3-none-any.whl`
 
@@ -129,7 +177,6 @@ from mazegen import MazeGenerator
 generator = MazeGenerator(
     seed=42,
     perfect=True,
-    rep=True,
     coord_entry=[0, 0],
     coord_exit=[9, 9],
     width=10,
@@ -161,7 +208,7 @@ solution = generator.get_solution()
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Our planning evolved during the development because some parts required more time and testing than expected. Our workflow became iterative:
 
 ```
-Implementation → Testing → Debugging → Modification → Improvement
+Implement → Test → Debug → Fix → Improve
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The pathfinding part was implemented at the very end of the project, after the maze generation and the main features were working correctly.
@@ -190,7 +237,7 @@ Implementation → Testing → Debugging → Modification → Improvement
 
 ## Specific Tools
 
-### MLX
+### MLX 
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We used **MLX** as the graphical tool for displaying the maze in a window.
 
@@ -203,3 +250,16 @@ Implementation → Testing → Debugging → Modification → Improvement
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We used `deque()` from the Python `collections` module for the pathfinding part of the project.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It was used as a queue in the Breadth-First-Search algorithm, allowing us to efficiently add and remove cells while searching for a path from the entry point to the exit.
+
+## Displaying mode
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the keyboard control has already been shown on the mlx window once the program works without errors, So just press the keyboard and the maze will change with its instruction related to it
+
+These are all the displaying mode even tought it has been mentionned on the mlx window
+```
+R: Regenerate the maze, so once R is pressed, the maze will automatically change 
+C: Change the color of the maze maze displayed
+S: Show the shortest path from the entrypoint to the exit, wich can be the solution as well
+X: Closing the mlx window
+```
+
+

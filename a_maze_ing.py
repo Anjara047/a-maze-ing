@@ -11,12 +11,17 @@ except Exception:
     print("###"*10)
     print("missing or invalid configuration file, for example: 'config.txt'")
     print("-usage: python3 a_maze_ing.py <file_name(or path)>")
-    print("-other option: just update the filename in the Makefile")
-    print("example: FILENAME=config.txt")
+    print("-other option: just update the filename in the Makefile in order")
+    print("\t\t to match with your configuration file's name.")
+    print("example: FILENAME =config.txt")
     print("###"*10)
     print()
     sys.exit()
-update_configs(filename)
+print()
+print("\t\t\t", "###"*10)
+print("\t\t\t\t  A-MAZE-ING")
+print("\t\t\t", "###"*10, "\n")
+update_configs(filename, True)
 coord_entry: list[int] = [int(str(configs["ENTRY"]).split(",")[0]),
                           int(str(configs["ENTRY"]).split(",")[1])]
 coord_exit: list[int] = [int(str(configs["EXIT"]).split(",")[0]),
@@ -24,7 +29,6 @@ coord_exit: list[int] = [int(str(configs["EXIT"]).split(",")[0]),
 maze = mazegen.MazeGenerator(
     int(configs['SEED']),
     bool(configs["PERFECT"]),
-    bool(configs["REPRODUCTIBLE"]),
     coord_entry,
     coord_exit,
     int(configs["WIDTH"]),

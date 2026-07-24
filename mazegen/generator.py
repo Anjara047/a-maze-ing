@@ -55,7 +55,7 @@ def check_neighborhood(
         loc_north = ((y - 1) * (width + 1)) + x
     if y < (height - 1):
         loc_south = ((y + 1) * (width + 1)) + x
-    return (loc_north, loc_east, loc_south, loc_west)
+    return (loc_north, loc_west, loc_south, loc_east)
 
 
 def destroy_wall(output: list[list[int]],
@@ -64,9 +64,9 @@ def destroy_wall(output: list[list[int]],
     """
     carve out the wall between the two adjacents cells
 
-    Args;
+    Args:
         output: Maze grid
-        current_loc; index of the current cell
+        current_loc: index of the current cell
         next_loc: index of the next cell
         width: number of active cell per row
         height: the total of rows in the grid
@@ -110,8 +110,6 @@ def locate_pattern(width: int, height: int) -> list[int]:
         it returns an empty list when height or width is less than 10
     """
     if width < 10 or height < 10:
-        print("[HEY!]The Area is too small for the pattern")
-        print("\t\t->so it's omitted")
         return []
     center = (width // 2, (height // 2))
     pattern: list[int] = []
@@ -164,12 +162,27 @@ def choose_next(current: int,
 def hunt_and_kill(output: list[list[int]], width: int, height: int,
                   entry: int, perfect: bool) -> list[list[int]]:
     """
-    visit all the cells if it has not yet processed,
-    it will be carved between the two cells
-    check the cell who has atleast one visited neighbor
-    if the dead end is reached
-    When generating an imperfect maze, additional walls may be removed to
-    introduce loops..
+    Visit all the cells not processed one by one
+    by using a loop(The loop begin by processing the entry cell
+    , and only ends when all cells have been processed):
+    The process consist to:
+    declare the actual cell = 'current'
+    then chose a next cell randomly,
+    walls between those two cells will be carved;
+    If a dead-end is reached:
+    Choose a new current by scannig
+        from the very first cell of the maze (0,0)
+        all the unprocessed cells : if at least
+        one of the cell's neighbour is a processed cell,
+        the actual scanned cell become the current and
+        walls between a random processed neighbour and
+        the current are destroyed.
+    If an unperfect maze is asked, before the scan
+        (the step explained above),choose a random cell
+        among the current's neighbor and destroy walls between
+        them...then choose a new current like in the scanning
+        step.
+
     Args:
         output: Maze grid to modify.
         width: Width of the maze.
@@ -177,8 +190,7 @@ def hunt_and_kill(output: list[list[int]], width: int, height: int,
         entry: Starting cell index.
         perfect: Whether to generate a perfect maze.
     return:
-        the maze when all the cell are all visited
-        with carved passages between the two cells
+        the maze as a list of list(cell) of int(walls)
     """
     pattern: list[int] = locate_pattern(width, height)
     processed_cells: list[int] = []
@@ -247,8 +259,9 @@ def convert_output(output: list[list[int]]) -> str:
     str_output = ""
     for cell in output:
         if cell != [-1, -1, -1, -1]:
-            binary = str(cell[0]) + str(cell[1]) + str(cell[2]) + str(cell[3])
-            str_output += (hex(int(binary, 2))[2:]).capitalize()
+            dec = (cell[0]*1) + (cell[1]*2) + (cell[2] * 4) + (cell[3] * 8)
+            str_hex = (hex(dec)[2:]).capitalize()
+            str_output += str_hex
         else:
             str_output += '\n'
     return str_output
@@ -259,7 +272,7 @@ def breadth_first_search(entry_cell: int,
                          width: int, height: int) -> list[int]:
     """
     Find the shortest path by traversing the opening maze grid
-    to track back the links and reconstruct the optimal route
+    to track back the links and reconstruct the optimal path
     from the entry to the exit position
     Args:
         entry_cell: Index of the maze entry cell.
@@ -268,7 +281,7 @@ def breadth_first_search(entry_cell: int,
         width: Width of the maze.
         height: Height of the maze.
     Returns:
-        returns the reversed path when the shortest path is found
+        returns the shortest path found
     """
     queue = deque([entry_cell])
     precedent: int = entry_cell
@@ -301,15 +314,15 @@ def breadth_first_search(entry_cell: int,
 def convert_path(path: list[int], entry_cell: int,
                  exit_cell: int, width: int) -> str:
     """
-    appending the destination cell path
-    and maps transition into directional characters
+    Convert the path into directional instructions.
     Args:
         path: List of cell indices representing the solution path.
         entry_cell: Index of the maze entry cell.
         exit_cell: Index of the maze exit cell.
         width: Width of the maze.
     Returns:
-        The list of all the movements from the entry to the exit
+        The list of all the directional instructions to follow to
+        reach the exit cell
     """
     solution = ""
     path += [exit_cell]
@@ -329,18 +342,25 @@ def convert_path(path: list[int], entry_cell: int,
 
 class MazeGenerator:
     """
-    Generate and solve rectangular mazes.
+    A class which generate and solve mazes.
+    Toinstantiate it:
+    Create a variable to put the object of the class,
+    then all the class' methods can be applied on the object
+    (variable)
+
+    Example:
+    >>>>>>> maze = MazeGenerator(42,True,[0,0],[1,1],7,9)
+            maze.generate()
 
     The generator can create either perfect or imperfect mazes and
     compute the shortest path between the entry and exit cells.
     """
 
-    def __init__(self, seed: int, perfect: bool, rep: bool,
+    def __init__(self, seed: int, perfect: bool,
                  coord_entry: list[int], coord_exit: list[int],
                  width: int, height: int) -> None:
         self.seed = seed
         self.perfect = perfect
-        self.rep = rep
         self.maze: list[list[int]] = []
         self.path: list[int] = []
         self.entry = (coord_entry[0]) + ((coord_entry[1]) * (width + 1))
@@ -351,11 +371,11 @@ class MazeGenerator:
     def generate(self) -> None:
         """
         Generate the maze by calling the strategies
-        which has been created above
-        Initializing with all walls before beeing carved
-        using the hunt & kill algorithm
+        which has been created above:
+        Initializing all walls before using
+        the hunt & kill algorithm
         """
-        if self.rep:
+        if self.seed != -69:
             random.seed(self.seed)
         output = full_cell(self.width, self.height)
         output = hunt_and_kill(
@@ -368,7 +388,7 @@ class MazeGenerator:
 
     def get_maze(self) -> str:
         """
-        Get the the generated maze
+        Get the generated maze
 
         Returns:
             The hexadecimal string representation of the maze.
@@ -379,7 +399,7 @@ class MazeGenerator:
 
     def solve(self) -> None:
         """
-            Compute the shortest path through
+            Compute the shortest solution
         """
         if self.maze == []:
             self.generate()
@@ -389,7 +409,7 @@ class MazeGenerator:
 
     def get_solution(self) -> str:
         """
-            get the maze's solution
+            get the maze's solution(the path)
 
             Returns:
                 A string containing the sequence of movements from the entry

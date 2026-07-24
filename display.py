@@ -3,10 +3,13 @@ import sys
 try:
     from mlx import Mlx
 except Exception:
-    print("Please run the command make install")
-    print("The dependency is yet to install")
+    print("####"*20)
+    print("\n\t\t\t ********HEEEEEEEYYYYYYYYY********\n")
+    print("\t\t\tPlease run the command make install")
+    print("\t\t\t  The dependency is yet to install\n")
+    print("####"*20)
     sys.exit()
-from parser_config import configs, update_configs
+from parser_config import configs
 from draw_maze import draw_maze
 import random
 from typing import Any
@@ -23,7 +26,6 @@ def update_filename(name: str) -> None:
     filename = name
 
 
-update_configs(filename)
 display = False
 theme = "cyberpunk"
 mlx = Mlx()
@@ -167,10 +169,8 @@ def on_key(keycode: int, maze: MazeGenerator) -> None:
         return
     if keycode == 114:
         mlx.mlx_clear_window(ptr, win)
-        update_configs(filename)
         configs["WIDTH"] = bases[0]
         configs["HEIGHT"] = bases[1]
-        update_configs(filename, True)
         coord_entry: list[int] = [int(str(configs["ENTRY"]).split(",")[0]),
                                   int(str(configs["ENTRY"]).split(",")[1])]
         coord_exit: list[int] = [int(str(configs["EXIT"]).split(",")[0]),
@@ -178,7 +178,6 @@ def on_key(keycode: int, maze: MazeGenerator) -> None:
         maze = MazeGenerator(
             int(configs['SEED']),
             bool((configs["PERFECT"])),
-            bool(configs["REPRODUCTIBLE"]),
             coord_entry,
             coord_exit,
             int(configs["WIDTH"]),
@@ -285,13 +284,13 @@ def draw_square(
     if cell != "0":
         walls = bin(int(cell, 16))[2:].zfill(4)
         x, y = loc
-        if walls[0] == "1":
-            draw_horizontal(x, y, length, color, img)
-        if walls[1] == "1":
-            draw_vertical(x, y, length, color, img)
-        if walls[2] == "1":
-            draw_horizontal(x, y + length, length, color, img)
         if walls[3] == "1":
+            draw_horizontal(x, y, length, color, img)
+        if walls[0] == "1":
+            draw_vertical(x, y, length, color, img)
+        if walls[1] == "1":
+            draw_horizontal(x, y + length, length, color, img)
+        if walls[2] == "1":
             draw_vertical(x + length, y, length, color, img)
 
 
@@ -314,10 +313,8 @@ def fill_content(to_avoid: list[int] = []) -> str:
     bases = bases
     if len(bases) == 0:
         return ""
-    update_configs(filename)
     configs["WIDTH"] = bases[0]
     configs["HEIGHT"] = bases[1]
-    update_configs(filename, True)
     e: list[str] = str(configs["ENTRY"]).split(",")
     entry_cell: tuple[int, int] = (int(e[0]), int(e[1]))
     ex: list[str] = str(configs["EXIT"]).split(",")
@@ -366,19 +363,17 @@ def show_maze(maze: MazeGenerator) -> None:
     clear_mlx_image(imgs[0])
     clear_mlx_image(imgs[1])
     clear_mlx_image(imgs[2])
-    update_configs(filename)
     configs["WIDTH"] = bases[0]
     configs["HEIGHT"] = bases[1]
-    update_configs(filename, True)
     file = open(configs['OUTPUT_FILE'], 'r')
     content = file.read()
     content2 = fill_content()
     content3 = fill_content(maze.path)
     params = generate_params(theme)
     file.close()
-    draw_maze(draw_square, params[0], content, imgs[0], 1, filename)
-    draw_maze(draw_square, params[1], content2, imgs[1], 2, filename)
-    draw_maze(draw_square, params[2], content3, imgs[2], 2, filename)
+    draw_maze(draw_square, params[0], content, imgs[0], 1)
+    draw_maze(draw_square, params[1], content2, imgs[1], 2)
+    draw_maze(draw_square, params[2], content3, imgs[2], 2)
     instructions1 = "R: regen  S: path"
     instructions2 = "C: color  X: quit"
     mlx.mlx_string_put(

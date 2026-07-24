@@ -2,13 +2,8 @@
 name = "mazegen"
 version = "0.1.0"
 description = "Reusable Maze Generator for 42 project"
-authors = [
-    {name = "Your Name",email = "you@example.com"}
-]
-readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
-    "mlx @ file:mlx-2.2-py3-none-any.whl",
     "mypy (>=2.3.0,<3.0.0)",
     "flake8 (>=7.3.0,<8.0.0)"
 ]
